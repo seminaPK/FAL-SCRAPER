@@ -1,0 +1,96 @@
+<html>
+<head>
+    <title>Mhoo - FAL estrazione dati</title>
+</head>
+<body>
+    <h1>Estrazione dati fermate e orari da FAL</h1>
+    <iframe id="search_output" style="display: none;">
+        Will containt search output.
+    </iframe>
+</body>
+
+<script>
+    //cicla su tutte le pagine
+    var search_output_element;
+    var elem;
+    var current_url;
+    var i=0;
+
+    var fal = [];
+
+    document.getElementById('search_output').onload = function(){
+        search_output_element= document.getElementById('search_output').contentWindow.document.getElementById("risultato-ricerca");
+
+        if(search_output_element.innerHTML.indexOf("Inserire i parametri di ricerca") == -1 && search_output_element.innerHTML.indexOf("non ha prodotto") == -1){
+
+            elem = document.getElementById('search_output').contentWindow.document.getElementById("risultato-ricerca").children[0].children[1];
+
+            //console.log("Risultati letti: "+elem.children.length/2);
+            for(var k=0;k<elem.children.length;k++){
+                if(k%2==0){
+                    if(elem.children[k].children[0].innerHTML.indexOf("bicicletta") == -1){
+                        console.log(
+                            elem.children[k].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[1].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[2].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[3].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[4].children[0].innerHTML.trim()
+                        );
+
+                        if(isNewTrip(elem.children[k].children[0].innerHTML.trim(), elem.children[k].children[2].children[0].innerHTML.trim())) {
+                            fal.push({
+                                "id": elem.children[k].children[0].innerHTML.trim(),
+                                "start": elem.children[k].children[1].children[0].innerHTML.trim(),
+                                "stop": elem.children[k].children[3].children[0].innerHTML.trim(),
+                                "start_time": elem.children[k].children[2].children[0].innerHTML.trim(),
+                                "stop_time": elem.children[k].children[4].children[0].innerHTML.trim()
+                            });
+                        }
+                    }
+                    else{
+                        console.log(
+                            elem.children[0].children[0].childNodes[0].nodeValue.trim() + " - " +
+                            elem.children[k].children[1].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[2].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[3].children[0].innerHTML.trim() + " - " +
+                            elem.children[k].children[4].children[0].innerHTML.trim()
+                        );
+
+                        if(isNewTrip(elem.children[k].children[0].innerHTML.trim(), elem.children[k].children[2].children[0].innerHTML.trim())) {
+                            fal.push({
+                                "id": elem.children[0].children[0].childNodes[0].nodeValue.trim(),
+                                "start": elem.children[k].children[1].children[0].innerHTML.trim(),
+                                "stop": elem.children[k].children[3].children[0].innerHTML.trim(),
+                                "start_time": elem.children[k].children[2].children[0].innerHTML.trim(),
+                                "stop_time": elem.children[k].children[4].children[0].innerHTML.trim()
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        if(i<100){
+            i++;
+            //console.log("File letto: data/mhoo14_fal_"+i+".html");
+            document.getElementById('search_output').src="data/mhoo14_fal_"+i+".html";
+        }
+        else{
+            console.log(" ===== TERMINATO ===== | Numero di viaggi: "+fal.length);
+            //console.log(JSON.stringify(fal));
+        }
+
+    };
+    document.getElementById('search_output').src="data/mhoo14_fal_0.html";
+
+    function isNewTrip(idTrip, startTimeTrip){
+        for(var j=0; j<fal.length;j++){
+            if(fal[j].id == idTrip && fal[j].start_time==startTimeTrip)
+                return false;
+        }
+        return true;
+    }
+
+</script>
+
+</html>
